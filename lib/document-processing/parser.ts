@@ -1,4 +1,4 @@
-import pdfParse from 'pdf-parse';
+import { PDFParse } from 'pdf-parse';
 import mammoth from 'mammoth';
 import { FileType } from '@/types/document';
 
@@ -14,8 +14,9 @@ export async function parseDocument(
       return buffer.toString('utf-8');
 
     case 'pdf':
-      const pdfData = await pdfParse(buffer);
-      return pdfData.text;
+      const pdfParser = new PDFParse({ data: buffer });
+      const pdfTextResult = await pdfParser.getText();
+      return pdfTextResult.text;
 
     case 'docx':
       const docxResult = await mammoth.extractRawText({ buffer });

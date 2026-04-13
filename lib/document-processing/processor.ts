@@ -86,5 +86,5 @@ export async function downloadFileFromStorage(
     return { buffer: Buffer.alloc(0), error };
   }
 
-  return { buffer: Buffer.from(data), error: null };
+  return { buffer: Buffer.from(await data.arrayBuffer()), error: null };
 }

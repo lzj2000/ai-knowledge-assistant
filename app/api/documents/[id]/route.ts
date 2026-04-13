@@ -4,9 +4,9 @@ import { supabaseAdmin } from '@/lib/supabase/client';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const id = params.id;
+  const { id } = await params;
 
   try {
     const document = await getDocument(id);
@@ -27,10 +27,11 @@ export async function DELETE(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const document = await getDocument(params.id);
+    const { id } = await params;
+    const document = await getDocument(id);
 
     if (!document) {
       return NextResponse.json({ error: '文档不存在' }, { status: 404 });

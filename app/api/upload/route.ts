@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     const title = (formData.get('title') as string) || file.name;
-    const categoryId = (formData.get('categoryId') as string) || null;
+    const categoryId = (formData.get('categoryId') as string) || undefined;
 
     // 验证文件大小
     if (file.size > MAX_FILE_SIZE) {
