@@ -6,9 +6,10 @@ import { Loading } from '@/components/ui/loading';
 interface MessageListProps {
   messages: Message[];
   loading?: boolean;
+  isStreaming?: boolean;
 }
 
-export function MessageList({ messages, loading }: MessageListProps) {
+export function MessageList({ messages, loading, isStreaming }: MessageListProps) {
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,8 +26,12 @@ export function MessageList({ messages, loading }: MessageListProps) {
         </div>
       )}
 
-      {messages.map((msg) => (
-        <MessageItem key={msg.id} message={msg} />
+      {messages.map((msg, index) => (
+        <MessageItem
+          key={msg.id}
+          message={msg}
+          isStreaming={isStreaming && index === messages.length - 1 && msg.role === 'assistant'}
+        />
       ))}
 
       {loading && (
