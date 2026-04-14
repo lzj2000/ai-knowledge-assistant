@@ -1,11 +1,12 @@
 import { chatCompletion } from '@/lib/llm/glm';
 import { buildRAGPrompt } from '@/lib/llm/prompts';
+import { vi, describe, expect, it, beforeEach } from 'vitest';
 
-global.fetch = jest.fn();
+vi.stubGlobal('fetch', vi.fn());
 
 describe('chatCompletion', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call GLM API with correct parameters', async () => {
@@ -13,10 +14,10 @@ describe('chatCompletion', () => {
       choices: [{ message: { content: '这是回答' } }],
     };
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
-    });
+    } as Response);
 
     const result = await chatCompletion('测试问题');
 

@@ -11,9 +11,15 @@ export interface RetrievedChunk {
   document_title?: string;
 }
 
+export interface RetrieveOptions {
+  limit?: number;
+  threshold?: number;
+  documentId?: string;  // 新增：可选的文档范围过滤
+}
+
 export async function retrieveRelevantChunks(
   question: string,
-  options?: { limit?: number; threshold?: number }
+  options?: RetrieveOptions
 ): Promise<RetrievedChunk[]> {
   // 1. 获取问题的向量嵌入
   const embedding = await getEmbedding(question);
@@ -22,6 +28,7 @@ export async function retrieveRelevantChunks(
   const chunks = await searchSimilarChunks(embedding, {
     limit: options?.limit || 10,
     threshold: options?.threshold || 0.1, // 降低阈值以匹配 GLM embedding-2 的特性
+    documentId: options?.documentId,
   });
 
   // 3. 获取文档标题

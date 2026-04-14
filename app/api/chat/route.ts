@@ -1,100 +1,81 @@
-import { NextRequest } from 'next/server';
-import { askQuestion } from '@/lib/rag';
-import { getMessages, createMessage, createConversation } from '@/lib/supabase/conversations';
-import { MessageSource } from '@/types/message';
+import { createUIMessageStream, createUIMessageStreamResponse, streamText } from 'ai';
+import { getMessageText } from '@/lib/chat/message-parts';
+import { glmModel } from '@/lib/chat/glm-provider';
+import { prepareKnowledgeAnswer } from '@/lib/chat/knowledge-prompt';
+import { createConversation, createMessage, getMessages } from '@/lib/supabase/conversations';
+import type { ChatRequestBody } from '@/types/chat';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { question, conversationId } = body;
+    const body = (await request.json()) as ChatRequestBody;
+    const question = getMessageText(body.message);
 
-    if (!question) {
-      return new Response(JSON.stringify({ error: '请提供问题' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    if (!question.trim()) {
+      return Response.json({ error: '请提供问题内容' }, { status: 400 });
     }
 
-    // 获取或创建对话
-    let convId = conversationId;
-    if (!convId) {
+    // 获取或创建会话
+    let conversationId = body.conversationId;
+    if (!conversationId) {
       const conversation = await createConversation({ title: question.slice(0, 50) });
-      convId = conversation.id;
+      conversationId = conversation.id;
     }
 
-    // 获取历史消息
-    const history = await getMessages(convId);
-
-    // 保存用户问题
+    // 持久化用户消息
     await createMessage({
-      conversation_id: convId,
+      conversation_id: conversationId,
       role: 'user',
-      content: question,
+      content: question
     });
 
-    // 执行RAG问答
-    const result = await askQuestion(question, {
-      conversationHistory: history,
-      stream: false,
+    // 获取历史消息并准备知识问答
+    const history = await getMessages(conversationId);
+    const prepared = await prepareKnowledgeAnswer({
+      question,
+      history,
+      documentId: body.documentId
     });
 
-    // 处理流式和非流式响应
-    if (result instanceof Object && 'answer' in result) {
-      const { answer, sources } = result as { answer: string; sources: MessageSource[] };
+    // 启动流式生成
+    const result = streamText({
+      model: glmModel(),
+      prompt: prepared.prompt
+    });
 
-      // 保存助手回答
-      await createMessage({
-        conversation_id: convId,
-        role: 'assistant',
-        content: answer,
-        sources,
-      });
+    let fullAnswer = '';
 
-      return new Response(JSON.stringify({
-        answer,
-        sources,
-        conversationId: convId,
-      }), {
-        headers: { 'Content-Type': 'application/json' },
-      });
-    } else {
-      // 流式响应
-      const encoder = new TextEncoder();
-      const stream = new ReadableStream({
-        async start(controller) {
-          let fullAnswer = '';
+    // 返回 AI SDK 流式响应
+    return createUIMessageStreamResponse({
+      stream: createUIMessageStream({
+        execute: ({ writer }) => {
+          // 先输出 conversationId
+          writer.write({ type: 'data-conversation', data: { conversationId } });
+          // 再输出 sources
+          writer.write({ type: 'data-sources', data: prepared.sources });
 
-          for await (const chunk of result as AsyncGenerator<string>) {
-            fullAnswer += chunk;
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: chunk })}\n\n`));
-          }
-
-          await createMessage({
-            conversation_id: convId,
-            role: 'assistant',
-            content: fullAnswer,
-          });
-
-          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-          controller.close();
-        },
-      });
-
-      return new Response(stream, {
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-        },
-      });
-    }
-
+          // 合并文本流
+          writer.merge(
+            result.toUIMessageStream({
+              onTextPart(part) {
+                fullAnswer += part.text;
+              },
+              async onFinish() {
+                // 保存完整回答和来源
+                await createMessage({
+                  conversation_id: conversationId!,
+                  role: 'assistant',
+                  content: fullAnswer,
+                  sources: prepared.sources
+                });
+              }
+            })
+          );
+        }
+      })
+    });
   } catch (error) {
     console.error('Chat error:', error);
     const errorMessage = error instanceof Error ? error.message : '问答失败';
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return Response.json({ error: errorMessage }, { status: 500 });
   }
 }

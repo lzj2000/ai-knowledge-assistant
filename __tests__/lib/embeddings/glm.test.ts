@@ -1,11 +1,12 @@
 import { getEmbedding } from '@/lib/embeddings/glm';
+import { vi, describe, expect, it, beforeEach } from 'vitest';
 
 // Mock fetch for testing
-global.fetch = jest.fn();
+vi.stubGlobal('fetch', vi.fn());
 
 describe('getEmbedding', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call GLM API with correct parameters', async () => {
@@ -13,10 +14,10 @@ describe('getEmbedding', () => {
       data: [{ embedding: [0.1, 0.2, 0.3] }],
     };
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
-    });
+    } as Response);
 
     const result = await getEmbedding('测试文本');
 
@@ -34,10 +35,11 @@ describe('getEmbedding', () => {
   });
 
   it('should throw error when API fails', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: false,
       statusText: 'Unauthorized',
-    });
+      text: async () => 'Unauthorized',
+    } as Response);
 
     await expect(getEmbedding('测试')).rejects.toThrow('Embedding API error');
   });
