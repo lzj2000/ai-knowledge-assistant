@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ConversationSidebar } from './conversation-sidebar';
 import { ChatComposer } from './chat-composer';
 import { MessageList } from './message-list';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { useConversationList } from '@/hooks/use-conversation-list';
 import { Button } from '@/components/ui/button';
 import type { Message } from '@/types/message';
+import type { MessageSource } from '@/types/message';
 
 interface ChatWorkspaceProps {
   initialConversationId?: string;
@@ -32,7 +34,10 @@ export function ChatWorkspace({
   const [title, setTitle] = useState(initialTitle);
   const [loading, setLoading] = useState(false);
 
-  // 占位处理函数 - Task 7 会实现完整的流式响应逻辑
+  // 会话列表 hook，用于新建会话后更新
+  const { addConversation, refresh } = useConversationList(20);
+
+  // 处理流式响应
   const handleSend = useCallback(async (question: string) => {
     setLoading(true);
 
@@ -47,6 +52,18 @@ export function ChatWorkspace({
     };
     setMessages(prev => [...prev, tempUserMsg]);
 
+    // 添加占位的助手消息（用于流式更新）
+    const tempAssistantId = `temp-assistant-${Date.now()}`;
+    const tempAssistantMsg: Message = {
+      id: tempAssistantId,
+      conversation_id: conversationId || '',
+      role: 'assistant',
+      content: '',
+      sources: [],
+      created_at: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, tempAssistantMsg]);
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -60,38 +77,96 @@ export function ChatWorkspace({
 
       if (!response.ok) throw new Error('请求失败');
 
-      const data = await response.json();
+      // 处理 SSE 流式响应
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = '';
+      let receivedConversationId = '';
+      let receivedSources: MessageSource[] = [];
 
-      // 更新会话 ID
-      if (data.conversationId && !conversationId) {
-        setConversationId(data.conversationId);
-        router.push(`/chat/${data.conversationId}`);
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                if (data.type === 'data-conversation') {
+                  receivedConversationId = data.data.conversationId;
+                } else if (data.type === 'data-sources') {
+                  receivedSources = data.data;
+                } else if (data.type === 'text-delta' || (data.type === 'text' && data.text)) {
+                  // 处理文本增量
+                  const textDelta = data.text || data.delta || '';
+                  accumulatedText += textDelta;
+
+                  // 更新消息列表中的助手消息
+                  setMessages(prev => prev.map(msg =>
+                    msg.id === tempAssistantId
+                      ? { ...msg, content: accumulatedText }
+                      : msg
+                  ));
+                }
+              } catch {
+                // 解析失败，跳过
+              }
+            }
+          }
+        }
       }
 
-      // 更新标题
-      if (data.title && !title) {
-        setTitle(data.title);
-      }
-
-      // 添加助手消息
-      const assistantMsg: Message = {
-        id: `temp-assistant-${Date.now()}`,
-        conversation_id: data.conversationId || conversationId,
+      // 流结束，更新最终消息
+      const finalAssistantMsg: Message = {
+        id: tempAssistantId,
+        conversation_id: receivedConversationId || conversationId || '',
         role: 'assistant',
-        content: data.answer,
-        sources: data.sources,
+        content: accumulatedText,
+        sources: receivedSources,
         created_at: new Date().toISOString(),
       };
-      setMessages(prev => [...prev.slice(0, -1), assistantMsg]);
+      setMessages(prev => prev.map(msg =>
+        msg.id === tempAssistantId ? finalAssistantMsg : msg
+      ));
 
-    } catch {
-      // 移除临时用户消息
-      setMessages(prev => prev.slice(0, -1));
-      // 这里可以添加 toast 提示
+      // 更新会话 ID 和标题
+      if (receivedConversationId && !conversationId) {
+        setConversationId(receivedConversationId);
+        // 添加到会话列表
+        addConversation({
+          id: receivedConversationId,
+          title: question.slice(0, 50),
+          created_at: new Date().toISOString()
+        });
+        router.push(`/chat/${receivedConversationId}`);
+      }
+
+      if (!title) {
+        setTitle(question.slice(0, 50));
+      }
+
+    } catch (error) {
+      // 移除占位消息
+      setMessages(prev => prev.filter(msg =>
+        msg.id !== tempUserMsg.id && msg.id !== tempAssistantId
+      ));
+      console.error('Chat error:', error);
     } finally {
       setLoading(false);
     }
-  }, [conversationId, documentId, title, router]);
+  }, [conversationId, documentId, title, router, addConversation]);
+
+  // 初始加载时如果有会话ID，刷新列表确保包含当前会话
+  useEffect(() => {
+    if (initialConversationId) {
+      refresh();
+    }
+  }, [initialConversationId, refresh]);
 
   // 移动端抽屉模式
   if (isMobile) {
@@ -117,7 +192,7 @@ export function ChatWorkspace({
               className="fixed inset-0 bg-black/50"
               onClick={() => setSidebarOpen(false)}
             />
-            <div className="fixed left-0 top-0 h-full w-72 bg-[color:var(--surface)] shadow-lg">
+            <div className="fixed left-0 top-0 h-full w-72 bg-[color:var(--surface)] shadow-lg overflow-hidden">
               <ConversationSidebar activeId={conversationId} />
               <button
                 onClick={() => setSidebarOpen(false)}
@@ -131,7 +206,7 @@ export function ChatWorkspace({
 
         {/* 对话主区 */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <MessageList messages={messages} loading={loading} />
+          <MessageList messages={messages} loading={loading} isStreaming={loading && messages.some(m => m.role === 'assistant' && m.content === '')} />
           <div className="p-4">
             <ChatComposer onSend={handleSend} disabled={loading} />
           </div>
@@ -168,7 +243,7 @@ export function ChatWorkspace({
         </header>
 
         {/* 消息列表 */}
-        <MessageList messages={messages} loading={loading} />
+        <MessageList messages={messages} loading={loading} isStreaming={loading && messages.some(m => m.role === 'assistant' && !m.content)} />
 
         {/* 底部输入区 */}
         <div className="p-6">

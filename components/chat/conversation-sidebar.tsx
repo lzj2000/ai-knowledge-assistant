@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -16,8 +16,6 @@ export function ConversationSidebar({ activeId }: ConversationSidebarProps) {
   const router = useRouter();
   const { showToast } = useToast();
   const { conversations, loading, deleteConversation } = useConversationList(20);
-  // deletingId 用于追踪当前正在删除的会话（可选的 UI 状态）
-  const [, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
     try {
@@ -28,13 +26,11 @@ export function ConversationSidebar({ activeId }: ConversationSidebarProps) {
       showToast('success', '会话已删除');
     } catch {
       showToast('error', '删除失败');
-    } finally {
-      setDeletingId(null);
     }
   };
 
   return (
-    <aside className="w-72 border-r border-[color:var(--border-soft)] bg-[color:var(--surface)] p-4 h-full">
+    <aside className="w-72 border-r border-[color:var(--border-soft)] bg-[color:var(--surface)] p-4 h-full overflow-y-auto flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-medium text-[color:var(--muted)]">最近会话</h2>
         <Link href="/chat">
@@ -53,7 +49,7 @@ export function ConversationSidebar({ activeId }: ConversationSidebarProps) {
           暂无会话记录
         </div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-2 flex-1 overflow-y-auto">
           {conversations.map((conv) => (
             <li key={conv.id} className="group relative">
               <Link
@@ -75,7 +71,6 @@ export function ConversationSidebar({ activeId }: ConversationSidebarProps) {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setDeletingId(conv.id);
                     }}
                   >
                     <span className="text-lg">x</span>
@@ -89,7 +84,7 @@ export function ConversationSidebar({ activeId }: ConversationSidebarProps) {
                     <p className="text-sm text-[color:var(--muted)]">删除后将同时移除该会话的全部消息记录，无法恢复。</p>
                   </DialogBody>
                   <DialogFooter>
-                    <Button variant="secondary" onClick={() => setDeletingId(null)}>取消</Button>
+                    <Button variant="secondary">取消</Button>
                     <Button variant="danger" onClick={() => handleDelete(conv.id)}>确认删除</Button>
                   </DialogFooter>
                 </DialogContent>
