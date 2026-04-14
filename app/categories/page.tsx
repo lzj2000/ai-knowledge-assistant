@@ -21,7 +21,7 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     loadCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleEdit = async (id: string, name: string, description: string) => {
@@ -33,7 +33,7 @@ export default function CategoriesPage() {
       });
       showToast('success', '分类已更新');
       loadCategories();
-    } catch (error) {
+    } catch {
       showToast('error', '更新失败');
     }
   };
@@ -43,7 +43,7 @@ export default function CategoriesPage() {
       await fetch(`/api/categories?id=${id}`, { method: 'DELETE' });
       showToast('success', '分类已删除');
       loadCategories();
-    } catch (error) {
+    } catch {
       showToast('error', '删除失败');
     }
   };
@@ -57,7 +57,7 @@ export default function CategoriesPage() {
       });
       showToast('success', '分类已添加');
       loadCategories();
-    } catch (error) {
+    } catch {
       showToast('error', '添加失败');
     }
   };

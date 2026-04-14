@@ -55,7 +55,7 @@ vi.mock('ai', () => ({
       return stream;
     })
   })),
-  createUIMessageStream: vi.fn((_options) => {
+  createUIMessageStream: vi.fn(() => {
     const chunks = [
       { type: 'data-conversation', data: { conversationId: 'conv-new' } },
       { type: 'data-sources', data: [{ document_id: 'doc-1', document_title: '员工手册', chunk_id: 'chunk-1', content: '报销流程说明' }] },

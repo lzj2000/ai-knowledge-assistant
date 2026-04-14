@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Message } from '@/types/message';
 import { MessageList } from './message-list';
 import { ChatInput } from './chat-input';
@@ -17,21 +17,21 @@ export function ChatContainer({ conversationId, documentId }: ChatContainerProps
   const [loading, setLoading] = useState(false);
   const [currentConvId, setCurrentConvId] = useState(conversationId);
 
-  useEffect(() => {
-    if (currentConvId) {
-      loadMessages(currentConvId);
-    }
-  }, [currentConvId]);
-
-  const loadMessages = async (convId: string) => {
+  const loadMessages = useCallback(async (convId: string) => {
     try {
       const response = await fetch(`/api/conversations/${convId}/messages`);
       const data = await response.json();
       setMessages(data);
-    } catch (error) {
+    } catch {
       showToast('error', '加载对话历史失败');
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    if (currentConvId) {
+      loadMessages(currentConvId);
+    }
+  }, [currentConvId, loadMessages]);
 
   const handleSend = async (question: string) => {
     setLoading(true);
@@ -75,7 +75,7 @@ export function ChatContainer({ conversationId, documentId }: ChatContainerProps
       };
       setMessages(prev => [...prev.slice(0, -1), assistantMsg]);
 
-    } catch (error) {
+    } catch {
       showToast('error', '问答失败');
       setMessages(prev => prev.slice(0, -1));
     } finally {

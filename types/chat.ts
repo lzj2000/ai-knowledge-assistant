@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { UIMessage } from 'ai';
-import type { MessageSource } from '@/types/message';
+// MessageSource 类型在 sourcePartSchema 的 infer 中使用
 
 export const sourcePartSchema = z.object({
   document_id: z.string(),

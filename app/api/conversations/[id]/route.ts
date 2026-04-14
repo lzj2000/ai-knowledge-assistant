@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getConversation } from '@/lib/supabase/conversations';
 
 export async function GET(
-  request: NextRequest,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -15,7 +15,7 @@ export async function GET(
     }
 
     return NextResponse.json(conversation);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: '获取对话失败' }, { status: 500 });
   }
 }

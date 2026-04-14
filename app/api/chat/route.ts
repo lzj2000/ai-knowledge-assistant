@@ -36,13 +36,23 @@ export async function POST(request: Request) {
       documentId: body.documentId
     });
 
-    // 启动流式生成
+    let fullAnswer = '';
+
+    // 启动流式生成，使用 onFinish 回调保存完整回答
     const result = streamText({
       model: glmModel(),
-      prompt: prepared.prompt
+      prompt: prepared.prompt,
+      onFinish: async ({ text }) => {
+        fullAnswer = text;
+        // 保存完整回答和来源
+        await createMessage({
+          conversation_id: conversationId!,
+          role: 'assistant',
+          content: fullAnswer,
+          sources: prepared.sources
+        });
+      }
     });
-
-    let fullAnswer = '';
 
     // 返回 AI SDK 流式响应
     return createUIMessageStreamResponse({
@@ -54,22 +64,7 @@ export async function POST(request: Request) {
           writer.write({ type: 'data-sources', data: prepared.sources });
 
           // 合并文本流
-          writer.merge(
-            result.toUIMessageStream({
-              onTextPart(part) {
-                fullAnswer += part.text;
-              },
-              async onFinish() {
-                // 保存完整回答和来源
-                await createMessage({
-                  conversation_id: conversationId!,
-                  role: 'assistant',
-                  content: fullAnswer,
-                  sources: prepared.sources
-                });
-              }
-            })
-          );
+          writer.merge(result.toUIMessageStream());
         }
       })
     });

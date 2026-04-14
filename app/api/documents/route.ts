@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(documents);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: '获取文档列表失败' }, { status: 500 });
   }
 }

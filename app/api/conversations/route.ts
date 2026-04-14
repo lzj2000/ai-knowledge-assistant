@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const conversations = await getConversations(limit);
     return NextResponse.json(conversations);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: '获取对话列表失败' }, { status: 500 });
   }
 }

@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { deleteDocument, getDocument } from '@/lib/supabase/documents';
 import { supabaseAdmin } from '@/lib/supabase/client';
 
 export async function DELETE(
-  request: NextRequest,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -20,13 +20,13 @@ export async function DELETE(
     await deleteDocument(id);
 
     return NextResponse.json({ message: '文档已删除' });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: '删除失败' }, { status: 500 });
   }
 }
 
 export async function GET(
-  request: NextRequest,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -38,7 +38,7 @@ export async function GET(
     }
 
     return NextResponse.json(document);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: '获取文档失败' }, { status: 500 });
   }
 }

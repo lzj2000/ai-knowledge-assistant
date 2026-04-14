@@ -1,4 +1,4 @@
-import { retrieveRelevantChunks, chunksToSources, RetrievedChunk } from './retrieval';
+import { retrieveRelevantChunks, chunksToSources } from './retrieval';
 import { buildContextFromChunks, buildHistoryContext } from './context-builder';
 import { chatCompletion, streamChatCompletion } from '@/lib/llm/glm';
 import { buildRAGPrompt, buildConversationPrompt } from '@/lib/llm/prompts';
