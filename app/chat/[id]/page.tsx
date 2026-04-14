@@ -1,20 +1,23 @@
-'use client';
+import { getConversation, getMessages } from '@/lib/supabase/conversations';
+import { ChatWorkspace } from '@/components/chat/chat-workspace';
+import type { Message } from '@/types/message';
 
-import React from 'react';
-import { ChatContainer } from '@/components/chat/chat-container';
-
-export default function ConversationPage({
-  params,
-}: {
+interface ConversationPageProps {
   params: Promise<{ id: string }>;
-}) {
-  // 使用 React.use 来解包 Promise
-  const resolvedParams = React.use(params);
+}
+
+export default async function ConversationPage({ params }: ConversationPageProps) {
+  const { id } = await params;
+
+  // 获取会话信息和消息列表
+  const conversation = await getConversation(id);
+  const messages: Message[] = await getMessages(id);
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">对话详情</h1>
-      <ChatContainer conversationId={resolvedParams.id} />
-    </div>
+    <ChatWorkspace
+      initialConversationId={id}
+      initialMessages={messages}
+      initialTitle={conversation?.title ?? null}
+    />
   );
 }

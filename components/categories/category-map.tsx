@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Category } from '@/types/category';
 import { Button } from '@/components/ui/button';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/layout/page-header';
 
@@ -99,29 +99,32 @@ function CategoryNode({
         </div>
       )}
 
-      <Dialog
-        open={showAddChildDialog}
-        onClose={() => setShowAddChildDialog(false)}
-        title="添加子分类"
-      >
-        <div className="space-y-3">
-          <Input
-            label="名称"
-            value={newChildName}
-            onChange={(e) => setNewChildName(e.target.value)}
-            placeholder="子分类名称"
-          />
-          <Input
-            label="描述"
-            value={newChildDesc}
-            onChange={(e) => setNewChildDesc(e.target.value)}
-            placeholder="分类描述（可选）"
-          />
-          <div className="flex gap-2 justify-end">
+      <Dialog open={showAddChildDialog} onOpenChange={setShowAddChildDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>添加子分类</DialogTitle>
+          </DialogHeader>
+          <DialogBody>
+            <div className="space-y-3">
+              <Input
+                label="名称"
+                value={newChildName}
+                onChange={(e) => setNewChildName(e.target.value)}
+                placeholder="子分类名称"
+              />
+              <Input
+                label="描述"
+                value={newChildDesc}
+                onChange={(e) => setNewChildDesc(e.target.value)}
+                placeholder="分类描述（可选）"
+              />
+            </div>
+          </DialogBody>
+          <DialogFooter>
             <Button variant="secondary" onClick={() => setShowAddChildDialog(false)}>取消</Button>
             <Button onClick={handleAddChild}>添加</Button>
-          </div>
-        </div>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );
@@ -175,29 +178,32 @@ export function CategoryMap({
         ))}
       </div>
 
-      <Dialog
-        open={showAddRootDialog}
-        onClose={() => setShowAddRootDialog(false)}
-        title="新增根分类"
-      >
-        <div className="space-y-3">
-          <Input
-            label="名称"
-            value={newRootName}
-            onChange={(e) => setNewRootName(e.target.value)}
-            placeholder="分类名称"
-          />
-          <Input
-            label="描述"
-            value={newRootDesc}
-            onChange={(e) => setNewRootDesc(e.target.value)}
-            placeholder="分类描述（可选）"
-          />
-          <div className="flex gap-2 justify-end">
+      <Dialog open={showAddRootDialog} onOpenChange={setShowAddRootDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>新增根分类</DialogTitle>
+          </DialogHeader>
+          <DialogBody>
+            <div className="space-y-3">
+              <Input
+                label="名称"
+                value={newRootName}
+                onChange={(e) => setNewRootName(e.target.value)}
+                placeholder="分类名称"
+              />
+              <Input
+                label="描述"
+                value={newRootDesc}
+                onChange={(e) => setNewRootDesc(e.target.value)}
+                placeholder="分类描述（可选）"
+              />
+            </div>
+          </DialogBody>
+          <DialogFooter>
             <Button variant="secondary" onClick={() => setShowAddRootDialog(false)}>取消</Button>
             <Button onClick={handleAddRoot}>添加</Button>
-          </div>
-        </div>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );

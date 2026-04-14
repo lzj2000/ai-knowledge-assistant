@@ -3,12 +3,12 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 
-interface ChatInputProps {
+interface ChatComposerProps {
   onSend: (question: string) => Promise<void>;
   disabled?: boolean;
 }
 
-export function ChatInput({ onSend, disabled }: ChatInputProps) {
+export function ChatComposer({ onSend, disabled }: ChatComposerProps) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -34,8 +34,8 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   };
 
   return (
-    <div className="border-t p-4">
-      <div className="flex gap-2">
+    <div className="rounded-[24px] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-4 shadow-sm">
+      <div className="flex gap-3">
         <textarea
           ref={inputRef}
           value={input}
@@ -43,18 +43,19 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           onKeyDown={handleKeyDown}
           placeholder="输入你想问的问题，Shift + Enter 换行"
           disabled={disabled || sending}
-          className="flex-1 px-3 py-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          rows={2}
+          className="flex-1 px-4 py-3 rounded-xl border border-[color:var(--border-soft)] bg-white resize-none focus:outline-none focus:ring-2 focus:ring-[color:var(--accent-strong)] text-[color:var(--ink)] placeholder:text-[color:var(--muted)]"
+          rows={3}
         />
         <Button
           onClick={handleSubmit}
           loading={sending}
           disabled={!input.trim() || disabled}
+          size="lg"
         >
           发送
         </Button>
       </div>
-      <p className="text-xs text-gray-500 mt-2">
+      <p className="text-xs text-[color:var(--muted)] mt-3">
         按 Enter 发送，Shift + Enter 换行
       </p>
     </div>

@@ -20,7 +20,7 @@ export function MessageList({ messages, loading }: MessageListProps) {
   return (
     <div ref={listRef} className="flex-1 overflow-y-auto p-4">
       {messages.length === 0 && !loading && (
-        <div className="flex items-center justify-center h-full text-gray-500">
+        <div className="flex items-center justify-center h-full text-[color:var(--muted)]">
           <p>请输入问题开始对话</p>
         </div>
       )}

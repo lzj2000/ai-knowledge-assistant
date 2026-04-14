@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Category } from '@/types/category';
 import { Button } from '@/components/ui/button';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
 interface CategoryTreeProps {
@@ -119,29 +119,32 @@ export function CategoryTree({ categories, onEdit, onDelete, onAdd }: CategoryTr
         rootCategories.map(cat => renderCategory(cat))
       )}
 
-      <Dialog
-        open={showAddDialog}
-        onClose={() => setShowAddDialog(false)}
-        title="添加分类"
-      >
-        <div className="space-y-3">
-          <Input
-            label="名称"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-          />
-          <Input
-            label="描述"
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-          />
-          <div className="flex gap-2 justify-end">
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>添加分类</DialogTitle>
+          </DialogHeader>
+          <DialogBody>
+            <div className="space-y-3">
+              <Input
+                label="名称"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
+              <Input
+                label="描述"
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+              />
+            </div>
+          </DialogBody>
+          <DialogFooter>
             <Button variant="secondary" onClick={() => setShowAddDialog(false)}>
               取消
             </Button>
             <Button onClick={handleAdd}>添加</Button>
-          </div>
-        </div>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );
