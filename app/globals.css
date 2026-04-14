@@ -1,23 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
-  --foreground: #171717;
-  --background: #ffffff;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground: #ededed;
-    --background: #0a0a0a;
-  }
+  --page: #f4efe6;
+  --surface: rgba(255, 252, 247, 0.92);
+  --surface-strong: #fffdf8;
+  --ink: #1e2430;
+  --muted: #596170;
+  --accent: #8b5e34;
+  --accent-strong: #2d4d74;
+  --border-soft: rgba(34, 41, 51, 0.08);
+  --border-strong: rgba(34, 41, 51, 0.16);
+  --shadow-card: 0 2px 8px rgba(34, 41, 51, 0.04);
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--page);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+.font-serif {
+  font-family: var(--font-serif), Georgia, serif;
 }
 
 @layer utilities {

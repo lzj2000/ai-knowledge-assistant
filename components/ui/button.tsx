@@ -15,12 +15,12 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const baseStyles = 'rounded-md font-medium transition-colors disabled:opacity-50';
+  const baseStyles = 'rounded-lg font-medium transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[color:var(--accent-strong)] focus:ring-offset-2';
 
   const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
-    secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
+    primary: 'bg-[color:var(--ink)] text-white hover:bg-[color:var(--accent-strong)]',
+    secondary: 'bg-white text-[color:var(--ink)] ring-1 ring-[color:var(--border-strong)] hover:bg-[color:var(--surface)]',
+    danger: 'bg-[#9f3b2f] text-white hover:bg-[#872f24]',
   };
 
   const sizes = {
@@ -37,7 +37,7 @@ export function Button({
     >
       {loading ? (
         <span className="flex items-center gap-2">
-          <span className="animate-spin">⏳</span>
+          <span className="animate-spin">...</span>
           {children}
         </span>
       ) : children}

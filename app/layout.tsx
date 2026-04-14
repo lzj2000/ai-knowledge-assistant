@@ -1,6 +1,20 @@
 import type { Metadata } from 'next';
+import { Noto_Sans_SC, Noto_Serif_SC } from 'next/font/google';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/toast';
+import { SiteHeader } from '@/components/layout/site-header';
+
+const sans = Noto_Sans_SC({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-sans'
+});
+
+const serif = Noto_Serif_SC({
+  subsets: ['latin'],
+  weight: ['600'],
+  variable: '--font-serif'
+});
 
 export const metadata: Metadata = {
   title: 'AI知识助手',
@@ -14,19 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className="antialiased">
+      <body className={`${sans.variable} ${serif.variable} font-sans antialiased bg-[color:var(--page)]`}>
         <ToastProvider>
           <div className="min-h-screen flex flex-col">
-            <header className="border-b px-6 py-4">
-              <nav className="flex items-center justify-between">
-                <a href="/" className="text-xl font-bold">AI知识助手</a>
-                <div className="flex gap-4">
-                  <a href="/chat" className="text-sm hover:underline">问答</a>
-                  <a href="/documents" className="text-sm hover:underline">文档</a>
-                  <a href="/categories" className="text-sm hover:underline">分类</a>
-                </div>
-              </nav>
-            </header>
+            <SiteHeader pathname="/" />
             <main className="flex-1">
               {children}
             </main>
