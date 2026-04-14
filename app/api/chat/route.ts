@@ -3,37 +3,53 @@ import { getMessageText } from '@/lib/chat/message-parts';
 import { glmModel } from '@/lib/chat/glm-provider';
 import { prepareKnowledgeAnswer } from '@/lib/chat/knowledge-prompt';
 import { createConversation, createMessage, getMessages } from '@/lib/supabase/conversations';
-import type { ChatRequestBody } from '@/types/chat';
+
+// 兼容两种请求格式：
+// 新格式（AI SDK）: { message: { parts: [{ type: 'text', text: '...' }] } }
+// 旧格式: { question: '...' }
+interface LegacyRequestBody {
+  question?: string;
+  conversationId?: string;
+  documentId?: string;
+}
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as ChatRequestBody;
-    const question = getMessageText(body.message);
+    const body = await request.json();
+
+    // 兼容新旧两种请求格式
+    const question = body.message
+      ? getMessageText(body.message)
+      : (body as LegacyRequestBody).question || '';
 
     if (!question.trim()) {
       return Response.json({ error: '请提供问题内容' }, { status: 400 });
     }
 
+    // 从新旧格式中提取 conversationId 和 documentId
+    const conversationId = body.conversationId;
+    const documentId = body.documentId;
+
     // 获取或创建会话
-    let conversationId = body.conversationId;
-    if (!conversationId) {
+    let convId = conversationId;
+    if (!convId) {
       const conversation = await createConversation({ title: question.slice(0, 50) });
-      conversationId = conversation.id;
+      convId = conversation.id;
     }
 
     // 持久化用户消息
     await createMessage({
-      conversation_id: conversationId,
+      conversation_id: convId,
       role: 'user',
       content: question
     });
 
     // 获取历史消息并准备知识问答
-    const history = await getMessages(conversationId);
+    const history = await getMessages(convId);
     const prepared = await prepareKnowledgeAnswer({
       question,
       history,
-      documentId: body.documentId
+      documentId
     });
 
     let fullAnswer = '';
@@ -46,7 +62,7 @@ export async function POST(request: Request) {
         fullAnswer = text;
         // 保存完整回答和来源
         await createMessage({
-          conversation_id: conversationId!,
+          conversation_id: convId!,
           role: 'assistant',
           content: fullAnswer,
           sources: prepared.sources
@@ -59,7 +75,7 @@ export async function POST(request: Request) {
       stream: createUIMessageStream({
         execute: ({ writer }) => {
           // 先输出 conversationId
-          writer.write({ type: 'data-conversation', data: { conversationId } });
+          writer.write({ type: 'data-conversation', data: { conversationId: convId } });
           // 再输出 sources
           writer.write({ type: 'data-sources', data: prepared.sources });
 

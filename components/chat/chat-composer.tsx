@@ -27,7 +27,8 @@ export function ChatComposer({ onSend, disabled }: ChatComposerProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    // 中文输入法组合输入时不触发发送
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       handleSubmit();
     }
