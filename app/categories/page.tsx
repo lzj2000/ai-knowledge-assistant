@@ -2,26 +2,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { Category } from '@/types/category';
-import { CategoryTree } from '@/components/categories/category-tree';
+import { CategoryMap } from '@/components/categories/category-map';
 import { useToast } from '@/components/ui/toast';
 
 export default function CategoriesPage() {
   const { showToast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
 
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
   const loadCategories = async () => {
     try {
       const response = await fetch('/api/categories');
       const data = await response.json();
       setCategories(data);
-    } catch (error) {
+    } catch {
       showToast('error', '加载分类失败');
     }
   };
+
+  useEffect(() => {
+    loadCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+  }, []);
 
   const handleEdit = async (id: string, name: string, description: string) => {
     try {
@@ -47,12 +48,12 @@ export default function CategoriesPage() {
     }
   };
 
-  const handleAdd = async (name: string, description: string) => {
+  const handleAdd = async (name: string, description: string, parentId?: string) => {
     try {
       await fetch('/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description }),
+        body: JSON.stringify({ name, description, parent_id: parentId }),
       });
       showToast('success', '分类已添加');
       loadCategories();
@@ -63,8 +64,7 @@ export default function CategoriesPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">分类管理</h1>
-      <CategoryTree
+      <CategoryMap
         categories={categories}
         onEdit={handleEdit}
         onDelete={handleDelete}
