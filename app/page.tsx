@@ -1,20 +1,30 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { getDashboardSummary } from '@/lib/home/get-dashboard-summary';
+import { PageHeader } from '@/components/layout/page-header';
+import { HomeAskPanel } from '@/components/home/home-ask-panel';
+import { KnowledgeSummaryGrid } from '@/components/home/knowledge-summary-grid';
+import { RecentConversationList } from '@/components/home/recent-conversation-list';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const summary = await getDashboardSummary();
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-      <h1 className="text-4xl font-bold mb-4">AI知识助手</h1>
-      <p className="text-gray-600 mb-8 text-center max-w-md">
-        上传文档，智能问答。基于RAG技术，让知识检索更精准。
-      </p>
-      <div className="flex gap-4">
-        <Link href="/chat">
-          <Button variant="primary">开始问答</Button>
-        </Link>
-        <Link href="/documents">
-          <Button variant="secondary">管理文档</Button>
-        </Link>
+    <div className="px-6 py-8 max-w-5xl mx-auto">
+      <PageHeader
+        label="Knowledge Hub"
+        title="提问优先的知识中枢"
+        description="在这里，提问是获取知识的主要方式。系统已准备好你的知识库，随时可以开始问答。"
+      />
+
+      <div className="mt-8 space-y-8">
+        <HomeAskPanel />
+
+        <KnowledgeSummaryGrid
+          documentCount={summary.documentCount}
+          categoryCount={summary.categoryCount}
+          recentDocuments={summary.recentDocuments}
+        />
+
+        <RecentConversationList conversations={summary.recentConversations} />
       </div>
     </div>
   );
