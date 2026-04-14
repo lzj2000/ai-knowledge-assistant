@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { UploadZone } from '@/components/documents/upload-zone';
+import { UploadGuide } from '@/components/documents/upload-guide';
+import { PageHeader } from '@/components/layout/page-header';
 import { useToast } from '@/components/ui/toast';
 
 export default function UploadPage() {
@@ -39,8 +41,20 @@ export default function UploadPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">上传文档</h1>
-      <UploadZone onUpload={handleUpload} categories={categories} />
+      <PageHeader
+        label="Upload"
+        title="上传文档"
+        description="导入知识文档，系统会自动解析并建立索引。"
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="order-2 md:order-1">
+          <UploadGuide />
+        </div>
+        <div className="order-1 md:order-2">
+          <UploadZone onUpload={handleUpload} categories={categories} />
+        </div>
+      </div>
     </div>
   );
 }

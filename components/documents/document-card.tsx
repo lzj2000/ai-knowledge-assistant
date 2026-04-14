@@ -15,12 +15,6 @@ const statusLabels = {
   error: '错误',
 };
 
-const statusColors = {
-  processing: 'bg-yellow-100 text-yellow-800',
-  ready: 'bg-green-100 text-green-800',
-  error: 'bg-red-100 text-red-800',
-};
-
 export function DocumentCard({ document, onDelete }: DocumentCardProps) {
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -30,33 +24,25 @@ export function DocumentCard({ document, onDelete }: DocumentCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <div className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="font-medium text-lg">{document.title}</h3>
-            <p className="text-sm text-gray-500 mt-1">{document.file_name}</p>
-          </div>
-          <span className={`px-2 py-1 text-xs rounded ${statusColors[document.status]}`}>
-            {statusLabels[document.status]}
-          </span>
+    <Card className="p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--accent)]">
+            {document.file_type ?? 'FILE'}
+          </p>
+          <h3 className="text-xl font-medium text-[color:var(--ink)]">{document.title}</h3>
+          <p className="text-sm text-[color:var(--muted)]">{document.file_name}</p>
         </div>
+        <span className="rounded-full border border-[color:var(--border-soft)] px-3 py-1 text-xs text-[color:var(--muted)]">
+          {statusLabels[document.status]}
+        </span>
+      </div>
 
-        <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-          <span>{document.chunk_count} 个分块</span>
-          <span>{document.file_size ? `${(document.file_size / 1024).toFixed(1)} KB` : '-'}</span>
-        </div>
-
-        <div className="flex gap-2 mt-4">
-          {document.status === 'ready' && (
-            <Link href={`/chat?doc=${document.id}`}>
-              <Button variant="primary" size="sm">提问</Button>
-            </Link>
-          )}
-          <Button variant="secondary" size="sm" onClick={handleDelete}>
-            删除
-          </Button>
-        </div>
+      <div className="mt-6 flex gap-3">
+        <Link href={`/chat?doc=${document.id}`}>
+          <Button size="sm">去提问</Button>
+        </Link>
+        <Button variant="secondary" size="sm" onClick={handleDelete}>删除</Button>
       </div>
     </Card>
   );

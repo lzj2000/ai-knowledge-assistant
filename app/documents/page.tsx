@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Document } from '@/types/document';
 import { DocumentList } from '@/components/documents/document-list';
+import { PageHeader } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 
@@ -18,7 +19,7 @@ export default function DocumentsPage() {
       const response = await fetch('/api/documents');
       const data = await response.json();
       setDocuments(data);
-    } catch (error) {
+    } catch {
       showToast('error', '加载文档失败');
     } finally {
       setLoading(false);
@@ -27,6 +28,7 @@ export default function DocumentsPage() {
 
   useEffect(() => {
     loadDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDelete = async (id: string) => {
@@ -39,19 +41,23 @@ export default function DocumentsPage() {
 
       showToast('success', '文档已删除');
       setDocuments(docs => docs.filter(d => d.id !== id));
-    } catch (error) {
+    } catch {
       showToast('error', '删除失败');
     }
   };
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">文档管理</h1>
-        <Link href="/documents/upload">
-          <Button variant="primary">上传文档</Button>
-        </Link>
-      </div>
+      <PageHeader
+        label="Knowledge Base"
+        title="文档管理"
+        description="上传和管理你的知识文档，在指定上下文中提问。"
+        action={
+          <Link href="/documents/upload">
+            <Button>上传文档</Button>
+          </Link>
+        }
+      />
 
       <DocumentList
         documents={documents}
