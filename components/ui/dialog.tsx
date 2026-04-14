@@ -149,3 +149,24 @@ export function DialogBody({ children, className = '' }: DialogBodyProps) {
     </div>
   );
 }
+
+interface DialogCloseProps {
+  asChild?: boolean;
+  children: React.ReactNode;
+}
+
+export function DialogClose({ asChild, children }: DialogCloseProps) {
+  const { setOpen } = useDialogContext();
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+      onClick: () => setOpen(false),
+    });
+  }
+
+  return (
+    <button onClick={() => setOpen(false)}>
+      {children}
+    </button>
+  );
+}

@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { ChatWorkspace } from '@/components/chat/chat-workspace';
+import { ConversationProvider } from '@/contexts/conversation-context';
 
 // Mock Next.js hooks
 vi.mock('next/navigation', () => ({
@@ -32,7 +33,11 @@ global.fetch = vi.fn(async (input: RequestInfo | URL) => {
 
 describe('ChatWorkspace', () => {
   it('渲染会话侧栏和输入区', async () => {
-    render(<ChatWorkspace initialConversationId={undefined} initialMessages={[]} initialTitle={null} />);
+    render(
+      <ConversationProvider>
+        <ChatWorkspace initialConversationId={undefined} initialMessages={[]} initialTitle={null} />
+      </ConversationProvider>
+    );
 
     expect(screen.getByText('最近会话')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('输入你想问的问题，Shift + Enter 换行')).toBeInTheDocument();

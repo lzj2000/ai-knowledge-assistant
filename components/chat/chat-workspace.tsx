@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ConversationSidebar } from './conversation-sidebar';
 import { ChatComposer } from './chat-composer';
 import { MessageList } from './message-list';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useConversationList } from '@/hooks/use-conversation-list';
+import { useConversations } from '@/contexts/conversation-context';
 import { Button } from '@/components/ui/button';
 import type { Message } from '@/types/message';
 import type { MessageSource } from '@/types/message';
@@ -35,7 +35,7 @@ export function ChatWorkspace({
   const [loading, setLoading] = useState(false);
 
   // 会话列表 hook，用于新建会话后更新
-  const { addConversation, refresh } = useConversationList(20);
+  const { addConversation } = useConversations();
 
   // 处理流式响应
   const handleSend = useCallback(async (question: string) => {
@@ -160,13 +160,6 @@ export function ChatWorkspace({
       setLoading(false);
     }
   }, [conversationId, documentId, title, router, addConversation]);
-
-  // 初始加载时如果有会话ID，刷新列表确保包含当前会话
-  useEffect(() => {
-    if (initialConversationId) {
-      refresh();
-    }
-  }, [initialConversationId, refresh]);
 
   // 移动端抽屉模式
   if (isMobile) {

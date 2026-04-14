@@ -4,8 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogBody } from '@/components/ui/dialog';
-import { useConversationList } from '@/hooks/use-conversation-list';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogBody, DialogClose } from '@/components/ui/dialog';
+import { useConversations } from '@/contexts/conversation-context';
 import { useToast } from '@/components/ui/toast';
 
 interface ConversationSidebarProps {
@@ -15,7 +15,7 @@ interface ConversationSidebarProps {
 export function ConversationSidebar({ activeId }: ConversationSidebarProps) {
   const router = useRouter();
   const { showToast } = useToast();
-  const { conversations, loading, deleteConversation } = useConversationList(20);
+  const { conversations, loading, deleteConversation } = useConversations();
 
   const handleDelete = async (id: string) => {
     try {
@@ -84,7 +84,9 @@ export function ConversationSidebar({ activeId }: ConversationSidebarProps) {
                     <p className="text-sm text-[color:var(--muted)]">删除后将同时移除该会话的全部消息记录，无法恢复。</p>
                   </DialogBody>
                   <DialogFooter>
-                    <Button variant="secondary">取消</Button>
+                    <DialogClose asChild>
+                      <Button variant="secondary">取消</Button>
+                    </DialogClose>
                     <Button variant="danger" onClick={() => handleDelete(conv.id)}>确认删除</Button>
                   </DialogFooter>
                 </DialogContent>

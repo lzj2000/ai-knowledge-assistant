@@ -3,6 +3,7 @@ import { Noto_Sans_SC, Noto_Serif_SC } from 'next/font/google';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/toast';
 import { SiteHeader } from '@/components/layout/site-header';
+import { ConversationProvider } from '@/contexts/conversation-context';
 
 const sans = Noto_Sans_SC({
   subsets: ['latin'],
@@ -30,12 +31,14 @@ export default function RootLayout({
     <html lang="zh-CN">
       <body className={`${sans.variable} ${serif.variable} font-sans antialiased bg-[color:var(--page)]`}>
         <ToastProvider>
-          <div className="min-h-screen flex flex-col">
-            <SiteHeader pathname="/" />
-            <main className="flex-1">
-              {children}
-            </main>
-          </div>
+          <ConversationProvider>
+            <div className="min-h-screen flex flex-col">
+              <SiteHeader pathname="/" />
+              <main className="flex-1">
+                {children}
+              </main>
+            </div>
+          </ConversationProvider>
         </ToastProvider>
       </body>
     </html>
