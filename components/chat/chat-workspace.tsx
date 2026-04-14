@@ -1,14 +1,12 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ConversationSidebar } from './conversation-sidebar';
 import { ChatComposer } from './chat-composer';
 import { MessageList } from './message-list';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useConversations } from '@/contexts/conversation-context';
-import { Button } from '@/components/ui/button';
 import type { Message } from '@/types/message';
 import type { MessageSource } from '@/types/message';
 
@@ -83,42 +81,62 @@ export function ChatWorkspace({
       let accumulatedText = '';
       let receivedConversationId = '';
       let receivedSources: MessageSource[] = [];
+      let sseBuffer = '';
+
+      const processBufferedEvents = (flush = false) => {
+        const lines = sseBuffer.split('\n');
+
+        if (flush) {
+          sseBuffer = '';
+        } else {
+          sseBuffer = lines.pop() ?? '';
+        }
+
+        for (const rawLine of lines) {
+          const line = rawLine.trim();
+          if (!line.startsWith('data: ')) {
+            continue;
+          }
+
+          const payload = line.slice(6);
+          if (!payload || payload === '[DONE]') {
+            continue;
+          }
+
+          try {
+            const data = JSON.parse(payload);
+
+            if (data.type === 'data-conversation') {
+              receivedConversationId = data.data.conversationId;
+            } else if (data.type === 'data-sources') {
+              receivedSources = data.data;
+            } else if (data.type === 'text-delta' || (data.type === 'text' && data.text)) {
+              const textDelta = data.text || data.delta || '';
+              accumulatedText += textDelta;
+
+              setMessages(prev => prev.map(msg =>
+                msg.id === tempAssistantId
+                  ? { ...msg, content: accumulatedText }
+                  : msg
+              ));
+            }
+          } catch {
+            // 忽略单条事件解析失败，继续读取后续数据
+          }
+        }
+      };
 
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6));
-
-                if (data.type === 'data-conversation') {
-                  receivedConversationId = data.data.conversationId;
-                } else if (data.type === 'data-sources') {
-                  receivedSources = data.data;
-                } else if (data.type === 'text-delta' || (data.type === 'text' && data.text)) {
-                  // 处理文本增量
-                  const textDelta = data.text || data.delta || '';
-                  accumulatedText += textDelta;
-
-                  // 更新消息列表中的助手消息
-                  setMessages(prev => prev.map(msg =>
-                    msg.id === tempAssistantId
-                      ? { ...msg, content: accumulatedText }
-                      : msg
-                  ));
-                }
-              } catch {
-                // 解析失败，跳过
-              }
-            }
-          }
+          sseBuffer += decoder.decode(value, { stream: true });
+          processBufferedEvents();
         }
+
+        sseBuffer += decoder.decode();
+        processBufferedEvents(true);
       }
 
       // 流结束，更新最终消息
@@ -164,14 +182,14 @@ export function ChatWorkspace({
   // 移动端抽屉模式
   if (isMobile) {
     return (
-      <div className="flex flex-col h-screen bg-[color:var(--page)]">
-        {/* 头部 */}
+      <div className="h-full flex flex-col bg-[color:var(--page)]">
+        {/* 会话标题行 */}
         <header className="flex items-center gap-3 px-4 py-3 border-b border-[color:var(--border-soft)] bg-[color:var(--surface)]">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 rounded-lg hover:bg-[color:var(--surface-strong)]"
           >
-            <span className="text-sm text-[color:var(--muted)]">会话列表</span>
+            <span className="text-sm text-[color:var(--muted)]">会话</span>
           </button>
           {title && (
             <h1 className="text-sm font-medium text-[color:var(--ink)] truncate">{title}</h1>
@@ -210,28 +228,21 @@ export function ChatWorkspace({
 
   // 桌面端双栏布局
   return (
-    <div className="flex h-screen bg-[color:var(--page)]">
+    <div className="h-full flex bg-[color:var(--page)]">
       {/* 左栏：会话列表 */}
       <ConversationSidebar activeId={conversationId} />
 
       {/* 右栏：对话主区 */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* 头部：标题与提示 */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[color:var(--border-soft)] bg-[color:var(--surface)]">
-          <div>
-            {title ? (
-              <h1 className="text-xl font-medium text-[color:var(--ink)]">{title}</h1>
-            ) : (
-              <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--accent)]">新对话</p>
-            )}
-            {documentId && (
-              <p className="text-xs text-[color:var(--muted)] mt-1">当前对话范围：指定文档</p>
-            )}
-          </div>
-          {conversationId && (
-            <Link href="/chat">
-              <Button variant="secondary" size="sm">新建对话</Button>
-            </Link>
+        <header className="px-6 py-4 border-b border-[color:var(--border-soft)] bg-[color:var(--surface)]">
+          {title ? (
+            <h1 className="text-xl font-medium text-[color:var(--ink)]">{title}</h1>
+          ) : (
+            <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--accent)]">新对话</p>
+          )}
+          {documentId && (
+            <p className="text-xs text-[color:var(--muted)] mt-1">当前对话范围：指定文档</p>
           )}
         </header>
 

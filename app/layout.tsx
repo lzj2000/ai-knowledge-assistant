@@ -32,9 +32,9 @@ export default function RootLayout({
       <body className={`${sans.variable} ${serif.variable} font-sans antialiased bg-[color:var(--page)]`}>
         <ToastProvider>
           <ConversationProvider>
-            <div className="min-h-screen flex flex-col">
+            <div className="h-screen flex flex-col overflow-hidden">
               <SiteHeader pathname="/" />
-              <main className="flex-1">
+              <main className="flex-1 overflow-hidden">
                 {children}
               </main>
             </div>
