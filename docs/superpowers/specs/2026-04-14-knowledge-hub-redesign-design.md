@@ -1,285 +1,285 @@
-# AI Knowledge Assistant Redesign
+# AI 知识助手改版设计文档
 
-## Overview
+## 概述
 
-This document defines the approved redesign for the current AI knowledge assistant.
-The product remains primarily an internal knowledge assistant for enterprise teams, but the interface should also feel polished enough for light external presentation.
+本文档定义当前 AI 知识助手的已确认改版方案。
+产品仍然主要服务企业内部知识助手场景，但界面也需要足够精致，能够承担轻量对外展示的角色。
 
-The core product decision is:
+本次改版的核心产品判断如下：
 
-- Users should be able to ask a question immediately after opening the app.
-- Document upload, document management, and category management exist to support better answers.
-- The visual tone should feel like an "AI editorial desk" or "knowledge hub", not a generic SaaS dashboard and not a generic chatbot skin.
+- 用户打开产品后，应该可以立即提问。
+- 文档上传、文档管理、分类管理都服务于“获得更好的回答”。
+- 整体视觉应当更像“AI 编辑台”或“知识中枢”，而不是通用 SaaS 后台，也不是套壳聊天机器人。
 
-## Product Decisions
+## 产品决策
 
-### Primary audience
+### 主要受众
 
-- Mixed audience, but biased toward internal enterprise users.
-- The UI should communicate trust, structure, and knowledge depth.
+- 受众是混合型，但明确偏向企业内部用户。
+- 界面需要传达可信、结构化、有知识深度的感觉。
 
-### Primary first action
+### 第一优先动作
 
-- The most important first action is asking a question.
-- The homepage must optimize for immediate question entry.
+- 用户最重要的第一动作是提问。
+- 首页必须围绕“快速进入提问”来设计。
 
-### Overall visual direction
+### 整体视觉方向
 
-- Chosen direction: editorial knowledge hub.
-- The interface should feel curated, calm, and intelligent.
-- The system should avoid common "AI product" visual cliches such as purple gradients, empty hero sections, and generic chat bubbles.
+- 已选方向：编辑部感的知识中枢。
+- 界面需要显得经过策划、冷静、有判断力。
+- 避免常见“AI 产品”视觉陈词滥调，例如紫色渐变、大而空的 hero、千篇一律的聊天气泡。
 
-### Page role decisions
+### 页面角色判断
 
-- The homepage is a question-first entry point with knowledge context.
-- Chat is the main work area.
-- Documents and categories are knowledge curation surfaces.
-- Upload is a guided import experience with a clear next step back into chat.
+- 首页是“提问优先”的知识入口页。
+- 聊天页是核心工作区。
+- 文档页和分类页是知识策展与组织页面。
+- 上传页是一个带明确后续引导的知识导入流程。
 
-## Experience Principles
+## 体验原则
 
-- Question-first: asking should always feel like the fastest path.
-- Knowledge-visible: the UI should show that answers are grounded in managed knowledge assets.
-- Editorial clarity: answers, sources, metadata, and content structure should feel readable and composed.
-- Unified system: pages should feel like one designed product, not isolated CRUD screens.
-- Enterprise trust: empty states, statuses, and errors should feel explicit and controlled.
+- 提问优先：提问始终应该是最快的入口。
+- 知识可见：界面需要让用户明确感知回答来自已管理的知识资产。
+- 编辑感清晰：回答、来源、元信息、内容排版都应可读、克制、像被编辑过。
+- 系统一致：各页面必须像同一套产品，而不是几个拼接起来的 CRUD 界面。
+- 企业可信：空状态、状态提示、错误提示都要明确、可控。
 
-## Information Architecture
+## 信息架构
 
-### Global structure
+### 全局结构
 
-- Keep a global top navigation with lightweight section switching.
-- Do not let the header dominate the screen.
-- Use one shared design language across all routes.
+- 保留全局顶部导航，用于轻量切换主要区域。
+- 顶栏不能抢走页面主视觉。
+- 全站使用统一的设计语言与布局节奏。
 
-### Routes
+### 路由角色
 
-- `/`: question-first knowledge hub.
-- `/chat`: main chat workspace for new conversations.
-- `/chat/[id]`: same workspace for existing conversations.
-- `/documents`: knowledge asset browsing and curation.
-- `/documents/upload`: guided import flow.
-- `/categories`: knowledge map and category curation.
+- `/`：提问优先的知识中枢。
+- `/chat`：新对话的主聊天工作区。
+- `/chat/[id]`：已有会话的同构聊天工作区。
+- `/documents`：知识资产浏览与策展页。
+- `/documents/upload`：知识导入页。
+- `/categories`：知识地图与分类策展页。
 
-## Visual System
+## 视觉系统
 
-### Tone
+### 调性
 
-- Editorial, structured, confident.
-- More like a digital newsroom or research desk than a software admin panel.
+- 编辑感、结构感、可信感。
+- 更像数字化研究桌面或编辑部，而不是传统后台管理系统。
 
-### Color direction
+### 色彩方向
 
-- Light background with slight paper warmth rather than stark white.
-- Primary text in deep ink tones.
-- Accent colors should be restrained and memorable, centered on ink blue and copper orange.
-- Use color to guide hierarchy and state, not as decoration.
+- 以带轻微纸张感的浅暖底色替代纯白底。
+- 主文本使用深墨色。
+- 强调色控制在少量且有记忆点的范围内，以墨蓝和铜橙为主。
+- 色彩用于引导层级与状态，而不是单纯装饰。
 
-### Typography
+### 字体方向
 
-- Use a distinctive serif face for large titles and key editorial moments.
-- Use a clear sans-serif face for body copy, controls, and dense UI.
-- Allow metadata, timestamps, and counts to use a tighter utility style when helpful.
+- 大标题和关键视觉时刻使用更有气质的衬线字体。
+- 正文、控件、密集信息使用清晰的无衬线字体。
+- 时间、计数、状态等元信息在需要时可使用更紧凑的工具型样式。
 
-### Components
+### 组件语言
 
-- Inputs should feel generous and deliberate.
-- Cards should use thin borders, soft depth, and consistent spacing.
-- Status pills, chips, source references, and conversation items should share one visual grammar.
-- Page headers should use a consistent pattern:
-  label, title, short description, primary action.
+- 输入框要更大、更有留白、更像编辑台而不是普通搜索框。
+- 卡片使用细边框、轻阴影、统一节奏的间距。
+- 状态标签、建议问题 chips、来源引用、会话列表项都使用同一套视觉语法。
+- 页面头部统一为一套结构：
+  标签、标题、简短说明、主操作。
 
-## Page Specifications
+## 页面设计说明
 
-### Homepage `/`
+### 首页 `/`
 
-Purpose:
-Provide an immediate place to ask while proving that the system is backed by an organized knowledge base.
+目标：
+让用户第一时间发起提问，同时证明系统背后有一套已组织的知识库。
 
-Layout:
+布局：
 
-- Central hero area with a large question input.
-- Suggested question chips below the main input.
-- A quick entry to the most recent conversation when available.
-- Supporting summary blocks for knowledge base size, recent uploads, and category access.
+- 中央主区为大尺寸提问输入区。
+- 提问框下方放建议问题 chips。
+- 在合适位置放置最近一次会话的快速入口。
+- 使用辅助信息块展示知识库规模、最近上传、分类入口等摘要信息。
 
-Behavior:
+行为：
 
-- The ask box is the dominant element on first load.
-- Supporting content should confirm system readiness without competing with the ask box.
-- Empty state should still feel useful and intentional.
+- 提问框必须成为首屏主角。
+- 辅助信息需要证明系统是“有知识底座的”，但不能与提问入口争主次。
+- 即使是空状态，也要让页面显得有用途、有方向。
 
-### Chat workspace `/chat` and `/chat/[id]`
+### 聊天工作区 `/chat` 与 `/chat/[id]`
 
-Purpose:
-Serve as the primary daily working surface for asking, reading, and continuing conversations.
+目标：
+作为用户日常提问、阅读、继续历史对话的核心工作区。
 
-Layout:
+布局：
 
-- Left column for conversation history and new chat action.
-- Right column for the active conversation.
-- Top area of the conversation pane should show the current conversation title and lightweight context signals.
-- Bottom area should contain a large input composer.
+- 左栏为会话历史与新建会话入口。
+- 右栏为当前对话主区。
+- 对话区顶部展示当前会话标题与轻量上下文提示。
+- 对话区底部为大输入区。
 
-Message presentation:
+消息呈现：
 
-- User messages remain compact and action-oriented.
-- Assistant responses render as answer cards, not generic bubble stacks.
-- Answer cards must support rich markdown structure, citations, code blocks, tables, and lists.
-- Sources render as a stable citation section below the answer content.
+- 用户消息保持紧凑，强调“提问动作”。
+- 助手回答以回答卡片形式呈现，而不是普通聊天气泡堆叠。
+- 回答卡片必须支持富文本 markdown、引用、代码块、表格、列表等结构。
+- 来源作为稳定的引用区显示在回答正文下方。
 
-Behavior:
+行为：
 
-- `/chat` and `/chat/[id]` should use the same visual shell.
-- Starting a new conversation should transition to the canonical conversation URL after the conversation id is created.
-- Conversation history should not be hidden behind secondary navigation.
+- `/chat` 与 `/chat/[id]` 使用同一套页面骨架。
+- 新建会话在拿到 `conversationId` 后，需要切换到标准的会话 URL。
+- 会话历史不能藏在弱化到难以发现的二级入口里。
 
-### Documents page `/documents`
+### 文档页 `/documents`
 
-Purpose:
-Help users browse and understand the current knowledge assets, not just perform CRUD.
+目标：
+帮助用户理解并浏览当前知识资产，而不只是执行 CRUD 操作。
 
-Layout:
+布局：
 
-- Strong page header with description and upload action.
-- Filters and browsing controls near the top.
-- Main content area as a structured list or hybrid card/list layout.
+- 顶部为带说明文字的强页面头部，并带上传主操作。
+- 顶部附近放置筛选与浏览控制。
+- 主体采用更有秩序的列表或卡片/列表混合布局。
 
-Content priorities:
+内容优先级：
 
-- Document title.
-- Processing status.
-- Category.
-- Chunk count.
-- File metadata.
-- Direct action to ask against that document.
+- 文档标题。
+- 处理状态。
+- 所属分类。
+- 分块数量。
+- 文件元信息。
+- 直接发起提问的操作入口。
 
-Behavior:
+行为：
 
-- Empty state should invite the user to create their first knowledge asset set.
-- "Ask" actions should carry the selected document context into the chat flow.
+- 空状态应当鼓励用户建立第一批知识资产。
+- “去提问”操作需要把文档上下文带入聊天流程。
 
-### Upload page `/documents/upload`
+### 上传页 `/documents/upload`
 
-Purpose:
-Offer a guided, low-friction import experience with strong trust cues.
+目标：
+提供低阻力、高信任感的知识导入体验。
 
-Layout:
+布局：
 
-- Centered upload panel with drag-and-drop target.
-- Inline title and category fields after file selection.
-- Lightweight guidance for supported formats, limits, and processing expectations.
+- 页面中心是主上传面板与拖拽区域。
+- 选中文件后，展示标题、分类等辅助字段。
+- 下方提供轻量说明，解释支持格式、大小限制和处理流程。
 
-Behavior:
+行为：
 
-- The upload surface should feel ceremonial and focused, not like a plain form.
-- Success state should guide users directly into asking questions.
-- Progress and processing states should explain what happens next.
+- 上传区域需要有一定仪式感和聚焦感，不能只是普通表单。
+- 上传成功后要明确引导用户去提问。
+- 处理进度与处理中状态需要告诉用户接下来会发生什么。
 
-### Categories page `/categories`
+### 分类页 `/categories`
 
-Purpose:
-Present the knowledge taxonomy as a map, not only as a maintenance tree.
+目标：
+把分类体系呈现为知识地图，而不只是维护树形结构。
 
-Layout:
+布局：
 
-- Page header that explains why categories matter.
-- Main area emphasizes hierarchy, description, and organizational meaning.
-- Add and edit operations remain available without visually turning the page into a raw admin console.
+- 页面头部解释分类对知识组织的作用。
+- 主体强调层级、描述与组织意义。
+- 新增、编辑仍然可用，但页面整体不能退化成原始后台面板。
 
-Behavior:
+行为：
 
-- Category hierarchy should be readable at a glance.
-- The page should feel like knowledge organization, not only configuration.
+- 分类层级应该一眼可读。
+- 页面应当传达“知识组织”感，而不是纯配置页。
 
-## AI Integration Strategy
+## AI 接入策略
 
-### Approved direction
+### 已确认方向
 
-- Replace the current manual chat fetch and custom SSE handling with Vercel AI SDK.
-- Keep the existing RAG retrieval, context assembly, and persistence responsibilities in the application code.
-- Let the chat route emit AI SDK-compatible streaming responses.
-- Let the client use the AI SDK chat hooks for message state and streaming UI.
+- 用 Vercel AI SDK 替换当前手写的聊天请求和自定义 SSE 处理。
+- 保留现有应用内的 RAG 检索、上下文拼装、消息持久化职责。
+- 聊天路由改为输出 AI SDK 兼容的流式响应。
+- 客户端聊天状态与流式渲染由 AI SDK 的 chat hooks 接管。
 
-### Model integration
+### 模型接入
 
-- Use the GLM OpenAI-compatible interface as the primary integration path.
-- Connect it through an AI SDK OpenAI-compatible provider.
-- Keep the provider boundary isolated so the application can swap model details without rewriting page logic.
+- 优先使用 GLM 的 OpenAI 兼容接口。
+- 通过 AI SDK 的 OpenAI-compatible provider 接入。
+- provider 层保持隔离，后续更换模型细节时不影响页面逻辑。
 
-### Markdown rendering
+### Markdown 渲染
 
-- Use `streamdown` for assistant answer rendering.
-- This is required so partially streamed markdown remains stable while tokens are still arriving.
-- Assistant messages should not depend on a non-streaming markdown renderer.
+- 助手回答使用 `streamdown` 渲染。
+- 这样可以在文本仍在流式生成时稳定处理未闭合 markdown 结构。
+- 助手消息不应继续依赖普通的非流式 markdown 渲染器。
 
-### Source rendering
+### 来源呈现
 
-- Sources should remain structured data on the assistant message.
-- Do not rely on the model to produce pseudo-citations inside plain text.
-- Render sources in a dedicated citation section below the answer body.
+- 来源继续作为助手消息上的结构化数据保存。
+- 不依赖模型在正文里自行拼接伪引用。
+- UI 中将来源渲染为回答正文下方的独立引用区。
 
-## Chat Data Flow
+## 聊天数据流
 
-### Server flow
+### 服务端流程
 
-1. Validate the incoming question.
-2. Create or resolve the conversation.
-3. Persist the user message.
-4. Run retrieval and build the RAG context.
-5. Start model streaming through AI SDK.
-6. Accumulate the final assistant text while streaming.
-7. Persist the completed assistant message with sources after stream completion.
+1. 校验输入问题。
+2. 创建或解析当前会话。
+3. 持久化用户消息。
+4. 执行检索并构建 RAG 上下文。
+5. 通过 AI SDK 启动模型流式生成。
+6. 在流式过程中累积完整的助手回答文本。
+7. 流结束后一次性保存助手完整回答与来源。
 
-### Client flow
+### 客户端流程
 
-1. Insert the local user message immediately.
-2. Stream the assistant answer into the active answer card.
-3. Keep the composer state explicit while generation is active.
-4. Preserve partial output if the stream fails mid-generation.
-5. Reflect final conversation id in the URL for new chats.
+1. 立即插入本地用户消息。
+2. 将助手回答流式写入当前回答卡片。
+3. 生成过程中明确展示输入区状态。
+4. 如果流中断，保留已经生成的部分内容。
+5. 新会话拿到最终 `conversationId` 后同步更新 URL。
 
-## Error Handling
+## 错误处理
 
-- No-match retrieval should still render a normal assistant answer card explaining that no relevant knowledge was found.
-- Chat errors must distinguish between network failure, model failure, and server failure where practical.
-- Upload and delete actions may continue using toast notifications.
-- The main chat experience must not rely on toast alone for critical status communication.
+- 未检索到内容时，也应渲染一张正常的助手回答卡片，明确说明当前知识库中无相关信息。
+- 聊天错误在可行范围内区分网络错误、模型错误、服务端错误。
+- 上传与删除这类操作可以继续使用 toast。
+- 聊天主流程不能只依赖 toast 传达关键状态。
 
-## Scope Boundaries
+## 范围边界
 
-### In scope
+### 本次改版范围内
 
-- Full visual redesign of the current routes.
-- Unification of `/chat` and `/chat/[id]` into one workspace pattern.
-- Migration of chat streaming to Vercel AI SDK.
-- Streaming markdown rendering with `streamdown`.
-- Reuse of current backend data model and current knowledge-management capabilities.
+- 当前所有页面的完整视觉改版。
+- 将 `/chat` 与 `/chat/[id]` 统一为同一类工作区模式。
+- 将聊天流式链路迁移到 Vercel AI SDK。
+- 使用 `streamdown` 进行流式 markdown 渲染。
+- 复用现有后端数据模型与知识管理能力。
 
-### Out of scope
+### 本次改版范围外
 
-- Authentication or permission system redesign.
-- New enterprise governance features.
-- Major database schema redesign unrelated to chat persistence or display metadata.
-- Expanding categories into a complex admin subsystem.
+- 登录、权限或认证系统改造。
+- 新的企业治理能力。
+- 与聊天持久化或展示元信息无关的大规模数据库重构。
+- 将分类扩展为复杂后台子系统。
 
-## Verification Requirements
+## 验证要求
 
-- Validate the chat route streaming behavior and persistence behavior.
-- Validate the chat UI for both new and existing conversations.
-- Validate streamed markdown rendering and source section stability.
-- Run lint and a production build to confirm compatibility with Next.js 16.2.3 and React 19.2.4.
+- 验证聊天路由的流式响应行为与消息持久化行为。
+- 验证聊天页在新会话与已有会话两种情况下的渲染与切换。
+- 验证流式 markdown 渲染与来源区的稳定性。
+- 运行 lint 与生产构建，确认与 Next.js 16.2.3 和 React 19.2.4 兼容。
 
-## Implementation Notes
+## 实现约束说明
 
-- Route handlers must continue to follow App Router conventions under `app/api/**/route.ts`.
-- Page and layout updates must follow the current Next.js 16 App Router rules already verified from the local docs bundle.
-- The redesign should preserve existing information architecture where it still supports the approved experience, but should not preserve current low-fidelity visual patterns.
+- 路由处理必须继续遵循 App Router 下 `app/api/**/route.ts` 的约定。
+- 页面与布局修改必须遵循已从本地文档确认过的 Next.js 16 App Router 规则。
+- 改版可以保留仍然合理的信息架构，但不应保留当前低完成度的视觉表达。
 
-## Success Criteria
+## 成功标准
 
-- A first-time user can ask a question from the homepage without hesitation.
-- The interface makes the knowledge base visible and credible.
-- The chat workspace feels like the center of the product.
-- Documents and categories feel curated rather than merely managed.
-- Assistant answers stream smoothly and render stable markdown while generating.
+- 首次进入产品的用户能够毫不犹豫地从首页发起提问。
+- 界面能让知识库显得真实、可见、可信。
+- 聊天工作区成为产品中心。
+- 文档与分类页面更像被策展过的知识空间，而不是简单管理页。
+- 助手回答能够平滑流式输出，并在生成过程中稳定渲染 markdown。
