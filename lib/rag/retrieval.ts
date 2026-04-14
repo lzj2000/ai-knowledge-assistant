@@ -1,5 +1,5 @@
 import { getEmbedding } from '@/lib/embeddings/glm';
-import { searchSimilarChunks } from '@/lib/supabase/chunks';
+import { searchSimilarChunks, SearchResult } from '@/lib/supabase/chunks';
 import { getDocument } from '@/lib/supabase/documents';
 import { MessageSource } from '@/types/message';
 
@@ -11,13 +11,6 @@ export interface RetrievedChunk {
   document_title?: string;
 }
 
-interface SearchResult {
-  id: string;
-  document_id: string;
-  content: string;
-  similarity: number;
-}
-
 export async function retrieveRelevantChunks(
   question: string,
   options?: { limit?: number; threshold?: number }
@@ -27,13 +20,13 @@ export async function retrieveRelevantChunks(
 
   // 2. 搜索相似分块
   const chunks = await searchSimilarChunks(embedding, {
-    limit: options?.limit || 5,
-    threshold: options?.threshold || 0.7,
-  }) as unknown as SearchResult[];
+    limit: options?.limit || 10,
+    threshold: options?.threshold || 0.1, // 降低阈值以匹配 GLM embedding-2 的特性
+  });
 
   // 3. 获取文档标题
   const chunksWithTitles = await Promise.all(
-    chunks.map(async (chunk) => {
+    chunks.map(async (chunk: SearchResult) => {
       const document = await getDocument(chunk.document_id);
       return {
         chunk_id: chunk.id,

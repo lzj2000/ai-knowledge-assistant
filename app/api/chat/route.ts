@@ -91,7 +91,8 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Chat error:', error);
-    return new Response(JSON.stringify({ error: '问答失败' }), {
+    const errorMessage = error instanceof Error ? error.message : '问答失败';
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

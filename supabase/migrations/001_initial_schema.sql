@@ -33,7 +33,7 @@ CREATE TABLE document_chunks (
   content TEXT NOT NULL,
   chunk_index INTEGER NOT NULL,
   metadata JSONB,
-  embedding vector(1536),
+  embedding vector(1024), -- GLM embedding-2 返回 1024 维向量
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -81,9 +81,9 @@ CREATE TRIGGER documents_updated_at
 
 -- 创建向量相似度搜索函数
 CREATE OR REPLACE FUNCTION search_chunks(
-  query_embedding vector(1536),
-  match_threshold float,
-  match_count int
+  query_embedding vector(1024), -- GLM embedding-2 返回 1024 维向量
+  match_threshold float DEFAULT 0.1, -- 降低阈值以匹配 GLM embedding-2 的特性
+  match_count int DEFAULT 10
 )
 RETURNS TABLE (
   id uuid,
@@ -107,6 +107,34 @@ BEGIN
   FROM document_chunks dc
   WHERE 1 - (dc.embedding <=> query_embedding) > match_threshold
   ORDER BY dc.embedding <=> query_embedding
+  LIMIT match_count;
+END;
+$$;
+
+-- 创建接受向量字符串参数的搜索函数（用于 Supabase REST API）
+CREATE OR REPLACE FUNCTION search_chunks_v2(
+  query_vector_str text,
+  match_threshold float DEFAULT 0.1,
+  match_count int DEFAULT 10
+)
+RETURNS TABLE (
+  id uuid,
+  document_id uuid,
+  content text,
+  similarity float
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    dc.id,
+    dc.document_id,
+    dc.content,
+    1 - (dc.embedding <=> query_vector_str::vector) AS similarity
+  FROM document_chunks dc
+  WHERE 1 - (dc.embedding <=> query_vector_str::vector) > match_threshold
+  ORDER BY dc.embedding <=> query_vector_str::vector
   LIMIT match_count;
 END;
 $$;

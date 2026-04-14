@@ -1,22 +1,35 @@
-const GLM_API_KEY = process.env.GLM_API_KEY!;
-const GLM_API_BASE_URL = process.env.GLM_API_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4';
-const GLM_EMBEDDING_MODEL = process.env.GLM_EMBEDDING_MODEL || 'embedding-2';
+// Embedding 使用 GLM 官方 API
+// 动态获取环境变量，避免缓存问题
+function getApiKey(): string {
+  return process.env.GLM_API_KEY || process.env.GLM_EMBEDDING_API_KEY || '';
+}
+function getApiBaseUrl(): string {
+  return process.env.GLM_API_BASE_URL || process.env.GLM_EMBEDDING_API_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4';
+}
+function getEmbeddingModel(): string {
+  return process.env.GLM_EMBEDDING_MODEL || 'embedding-2';
+}
 
 export async function getEmbedding(text: string): Promise<number[]> {
-  const response = await fetch(`${GLM_API_BASE_URL}/embeddings`, {
+  const apiKey = getApiKey();
+  const baseUrl = getApiBaseUrl();
+  const model = getEmbeddingModel();
+
+  const response = await fetch(`${baseUrl}/embeddings`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${GLM_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       input: text,
-      model: GLM_EMBEDDING_MODEL,
+      model: model,
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`Embedding API error: ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Embedding API error: ${response.statusText} - ${errorText}`);
   }
 
   const data = await response.json();

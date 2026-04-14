@@ -1,12 +1,15 @@
-const GLM_API_KEY = process.env.GLM_API_KEY!;
-const GLM_API_BASE_URL = process.env.GLM_API_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4';
-const GLM_CHAT_MODEL = process.env.GLM_CHAT_MODEL || 'glm-4-flash';
+const GLM_API_KEY = process.env.GLM_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN!;
+const GLM_API_BASE_URL = process.env.GLM_API_BASE_URL || process.env.ANTHROPIC_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4';
+const GLM_CHAT_MODEL = process.env.GLM_CHAT_MODEL || process.env.ANTHROPIC_DEFAULT_SONNET_MODEL || 'glm-5';
 
 export async function chatCompletion(
   prompt: string,
   options?: { temperature?: number; maxTokens?: number }
 ): Promise<string> {
-  const response = await fetch(`${GLM_API_BASE_URL}/chat/completions`, {
+  // GLM 官方 API 使用 /chat/completions 端点
+  const endpoint = `${GLM_API_BASE_URL}/chat/completions`;
+
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -32,7 +35,10 @@ export async function* streamChatCompletion(
   prompt: string,
   options?: { temperature?: number; maxTokens?: number }
 ): AsyncGenerator<string> {
-  const response = await fetch(`${GLM_API_BASE_URL}/chat/completions`, {
+  // GLM 官方 API 使用 /chat/completions 端点
+  const endpoint = `${GLM_API_BASE_URL}/chat/completions`;
+
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

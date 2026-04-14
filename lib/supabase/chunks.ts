@@ -1,6 +1,14 @@
 import { supabaseAdmin } from './client';
 import { DocumentChunk, CreateChunkInput } from '@/types/chunk';
 
+// 搜索结果类型（包含相似度分数）
+export interface SearchResult {
+  id: string;
+  document_id: string;
+  content: string;
+  similarity: number;
+}
+
 export async function createChunks(inputs: CreateChunkInput[]): Promise<DocumentChunk[]> {
   const { data, error } = await supabaseAdmin
     .from('document_chunks')
@@ -31,20 +39,75 @@ export async function deleteChunksByDocument(documentId: string): Promise<void> 
   if (error) throw error;
 }
 
+/**
+ * 搜索相似的文档分块
+ * 使用 pgvector 进行向量相似度搜索，如果 RPC 失败则回退到内存搜索
+ */
 export async function searchSimilarChunks(
   embedding: number[],
   options?: { limit?: number; threshold?: number }
-): Promise<DocumentChunk[]> {
-  const limit = options?.limit || 5;
-  const threshold = options?.threshold || 0.7;
+): Promise<SearchResult[]> {
+  const limit = options?.limit || 10;
+  const threshold = options?.threshold || 0.1;
 
-  // 使用pgvector进行相似度搜索
-  const { data, error } = await supabaseAdmin.rpc('search_chunks', {
-    query_embedding: embedding,
+  // 构造向量字符串格式 '[x1, x2, x3, ...]'
+  const vectorString = `[${embedding.join(',')}]`;
+
+  // 尝试使用 RPC 函数进行向量搜索
+  const { data, error } = await supabaseAdmin.rpc('search_chunks_v2', {
+    query_vector_str: vectorString,
     match_threshold: threshold,
     match_count: limit,
   });
 
-  if (error) throw error;
-  return data || [];
+  // 如果 RPC 失败或返回空结果，回退到内存搜索
+  if (error || !data || data.length === 0) {
+    return fallbackMemorySearch(embedding, threshold, limit);
+  }
+
+  return data as SearchResult[];
+}
+
+/**
+ * 内存搜索回退方案
+ * 当 RPC 函数不可用时，在内存中计算余弦相似度
+ */
+async function fallbackMemorySearch(
+  embedding: number[],
+  threshold: number,
+  limit: number
+): Promise<SearchResult[]> {
+  const { data: allChunks, error: fetchError } = await supabaseAdmin
+    .from('document_chunks')
+    .select('id, document_id, content, embedding');
+
+  if (fetchError) throw fetchError;
+
+  if (!allChunks || allChunks.length === 0) {
+    return [];
+  }
+
+  // 在内存中计算余弦相似度
+  const results: SearchResult[] = allChunks.map(chunk => {
+    const chunkEmbedding = typeof chunk.embedding === 'string'
+      ? JSON.parse(chunk.embedding)
+      : chunk.embedding;
+
+    const dotProduct = embedding.reduce((sum: number, val: number, i: number) => sum + val * chunkEmbedding[i], 0);
+    const normA = Math.sqrt(embedding.reduce((sum: number, val: number) => sum + val * val, 0));
+    const normB = Math.sqrt(chunkEmbedding.reduce((sum: number, val: number) => sum + val * val, 0));
+    const similarity = dotProduct / (normA * normB);
+
+    return {
+      id: chunk.id,
+      document_id: chunk.document_id,
+      content: chunk.content,
+      similarity,
+    };
+  });
+
+  return results
+    .filter(r => r.similarity > threshold)
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, limit);
 }
